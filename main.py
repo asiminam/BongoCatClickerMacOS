@@ -1,25 +1,25 @@
-import pydirectinput
-import win32gui
-import win32con
+import pyautogui
 import time
 import random
 import threading
-import keyboard
 import tkinter as tk
 from tkinter import font as tkfont
+from pynput import keyboard
+from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionAll, kCGNullWindowID
 
-pydirectinput.PAUSE = 0
+pyautogui.PAUSE = 0
 
 # ── CONFIG ──────────────────────────────────────────────────────────────────
-BONGO_WINDOW_TITLE = "BongoCat" # adjust if title differs in your language
-WINDOW_TITLE = "Bongo Cat Clicker"   # adjust if title differs in your language
-TOGGLE_KEY   = "P"
+BONGO_WINDOW_TITLE = "BongoCat"    
+WINDOW_TITLE = "Bongo Cat Clicker" 
+TOGGLE_KEY   = "p"                
 INTERVAL_MIN = 0.02
 INTERVAL_MAX = 0.03
 HOLD_MIN     = 0.03
 HOLD_MAX     = 0.04
 DEBOUNCE     = 0.4
 # ────────────────────────────────────────────────────────────────────────────
+
 KEYS = [
     'a','b','c','d','e','g','h','i','j','k','l','m',
     'n','o','p','q','r','s','t','u','v','w','x','y',
@@ -37,16 +37,22 @@ btn_toggle   = None
 root         = None
 
 def find_and_focus():
-    hwnd = win32gui.FindWindow(None, BONGO_WINDOW_TITLE)
-    if hwnd and win32gui.IsWindow(hwnd):
-        return True
+    """Queries Mac OS WindowServer to check if BongoCat is running."""
+    window_list = CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID)
+    for window in window_list:
+        # Get window owner name or window name
+        owner_name = window.get('kCGWindowOwnerName', '')
+        window_name = window.get('kCGWindowName', '')
+        
+        if BONGO_WINDOW_TITLE.lower() in owner_name.lower() or BONGO_WINDOW_TITLE.lower() in window_name.lower():
+            return True
     return False
 
 def press_key(key):
     try:
-        pydirectinput.keyDown(key)
+        pyautogui.keyDown(key)
         time.sleep(random.uniform(HOLD_MIN, HOLD_MAX))
-        pydirectinput.keyUp(key)
+        pyautogui.keyUp(key)
     except Exception as e:
         print(f"[press] Error on '{key}': {e}")
 
@@ -61,10 +67,15 @@ def auto_press_loop():
             time.sleep(0.05)
             continue
 
-        # check if Bongo Cat is still running every 10 seconds
+        # Check if Bongo Cat is still open every 10 seconds
         now = time.time()
         if now - last_focus > 10.0:
-            find_and_focus()
+            if not find_and_focus():
+                set_status("Window not found", "#ffaa00")
+                with lock:
+                    running = False
+                root.after(0, update_ui_state)
+                continue
             last_focus = now
 
         try:
@@ -77,6 +88,16 @@ def auto_press_loop():
 def set_status(text, color):
     if status_label and root:
         root.after(0, lambda: status_label.config(text=text, fg=color))
+
+def update_ui_state():
+    """Updates button text safely on the main thread."""
+    global running
+    if running:
+        set_status("● Running", "#00ff88")
+        btn_toggle.config(text=f"■ Stop  [{TOGGLE_KEY.upper()}]")
+    else:
+        set_status("● Stopped", "#ff4444")
+        btn_toggle.config(text=f"▶ Start  [{TOGGLE_KEY.upper()}]")
 
 def toggle_running():
     global running, _last_toggle
@@ -95,27 +116,23 @@ def toggle_running():
             with lock:
                 running = False
             return
-        set_status("● Running", "#00ff88")
-        btn_toggle.config(text="■ Stop  [" + TOGGLE_KEY + "]")
-    else:
-        set_status("● Stopped", "#ff4444")
-        btn_toggle.config(text="▶ Start  [" + TOGGLE_KEY + "]")
+    
+    update_ui_state()
 
-def on_hotkey(event):
-    root.focus_force()
-    toggle_running()
+def on_press_hotkey(key):
+    """Callback for pynput global key listener."""
+    try:
+        if hasattr(key, 'char') and key.char == TOGGLE_KEY:
+            # Tkinter likes UI updates triggered from root.after
+            root.after(0, toggle_running)
+    except Exception as e:
+        print(f"Hotkey error: {e}")
 
 def on_close():
     global running
     with lock:
         running = False
     root.destroy()
-
-def on_focus_out(event):
-    global running
-    if running and event.widget == root:
-        root.focus_force()
-
 
 def build_gui():
     global root, status_label, btn_toggle
@@ -126,13 +143,14 @@ def build_gui():
     root.resizable(False, False)
     root.configure(bg="#1e1e2e")
     root.protocol("WM_DELETE_WINDOW", on_close)
+    
     root.attributes('-topmost', True)
     root.attributes('-alpha', 0.95)
 
-    f_title  = tkfont.Font(family="Segoe UI", size=13, weight="bold")
-    f_status = tkfont.Font(family="Segoe UI", size=11)
-    f_btn    = tkfont.Font(family="Segoe UI", size=10)
-    f_hint   = tkfont.Font(family="Segoe UI", size=8)
+    f_title  = tkfont.Font(family="System", size=14, weight="bold")
+    f_status = tkfont.Font(family="System", size=12)
+    f_btn    = tkfont.Font(family="System", size=11)
+    f_hint   = tkfont.Font(family="System", size=9)
 
     tk.Label(root, text="Bongo Cat Clicker",
              font=f_title, bg="#1e1e2e", fg="#cdd6f4").pack(pady=(14, 2))
@@ -142,8 +160,9 @@ def build_gui():
     status_label.pack(pady=2)
 
     btn_toggle = tk.Button(
-        root, text="▶ Start  [" + TOGGLE_KEY + "]", font=f_btn,
+        root, text=f"▶ Start  [{TOGGLE_KEY.upper()}]", font=f_btn,
         bg="#313244", fg="#cdd6f4", activebackground="#45475a",
+        highlightbackground="#1e1e2e", 
         relief="flat", padx=12, pady=6, cursor="hand2",
         command=toggle_running
     )
@@ -151,14 +170,19 @@ def build_gui():
 
     tk.Label(root, text="Bongo Cat must be open to start",
              font=f_hint, bg="#1e1e2e", fg="#6c7086").pack()
-    # root.bind("<FocusIn>"8, on_focus_in)
-    root.bind("<FocusOut>", on_focus_out)
 
     return root
 
+def start_hotkey_listener():
+    """Starts the Mac keyboard listener as a background thread."""
+    listener = keyboard.Listener(on_press=on_press_hotkey)
+    listener.daemon = True
+    listener.start()
+
 if __name__ == "__main__":
-    keyboard.on_press_key(TOGGLE_KEY, on_hotkey)
+    start_hotkey_listener()
     threading.Thread(target=auto_press_loop, daemon=True).start()
+    
     root = build_gui()
-    print("[INFO] " + TOGGLE_KEY + " = Start/Stop | Close window to exit")
+    print(f"[INFO] {TOGGLE_KEY.upper()} = Start/Stop | Close window to exit")
     root.mainloop()
