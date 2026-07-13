@@ -8,50 +8,7 @@ A high-speed, multi-threaded automatic key-spammer built with a sleek **Catppucc
 
 ---
 
-# 🛠️ Installation & Setup
-
-If you've never installed Python or used Terminal on macOS before, simply follow these steps.
-
-## 1. Install Python 3
-
-macOS doesn't include an up-to-date Python installation by default.
-
-1. Visit the official Python website:
-   https://www.python.org/downloads/
-
-2. Download the latest **Python 3.x** installer.
-
-3. Run the downloaded `.pkg` installer.
-
-4. **Important:** After installation finishes, open the folder that appears and run:
-
-```
-Install Certificates.command
-```
-
-This installs SSL certificates required for downloading Python packages.
-
----
-
-## 2. Download This Repository
-
-### Download ZIP
-
-1. Click the green **Code** button on GitHub.
-2. Select **Download ZIP**.
-3. Extract the ZIP file.
-4. Open **Terminal**.
-5. Type:
-
-```bash
-cd
-```
-
-Then drag the extracted folder into the Terminal window and press **Enter**.
-
----
-
-## 3. Install Dependencies
+## Install Dependencies
 
 ```bash
 python3 -m pip install pyautogui pynput pyobjc
