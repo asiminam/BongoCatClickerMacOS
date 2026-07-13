@@ -8,17 +8,6 @@ A high-speed, multi-threaded automatic key-spammer built with a sleek **Catppucc
 
 ---
 
-## ✨ Features
-
-- 🚀 **Blazing Fast Keystrokes** – Zero-delay simulation optimized for high CPS (Clicks Per Second).
-- 🎲 **Anti-Detection Randomization** – Simulates micro-delays (`0.02s`–`0.04s`) for more natural behavior and improved stability.
-- ⌨️ **Global Hotkey Toggle** – Instantly start or stop the clicker by pressing **P**, even while running in the background.
-- 🧭 **Dynamic Window Tracking** – Continuously checks whether **Bongo Cat** is open before sending any inputs.
-- 🎨 **Modern UI** – Minimalist dark interface inspired by the **Catppuccin** theme.
-- ⚡ **Multi-Threaded Architecture** – Keeps the UI responsive while background workers handle input automation.
-
----
-
 # 🛠️ Installation & Setup
 
 If you've never installed Python or used Terminal on macOS before, simply follow these steps.
