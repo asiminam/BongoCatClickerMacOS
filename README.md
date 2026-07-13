@@ -35,16 +35,7 @@ This installs SSL certificates required for downloading Python packages.
 
 ## 2. Download This Repository
 
-### Option A — Using Git
-
-Open **Terminal** (`⌘ + Space` → Terminal) and run:
-
-```bash
-git clone https://github.com/YOUR_USERNAME/BongoCatClicker-main.git
-cd BongoCatClicker-main
-```
-
-### Option B — Download ZIP
+### Download ZIP
 
 1. Click the green **Code** button on GitHub.
 2. Select **Download ZIP**.
