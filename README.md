@@ -62,14 +62,6 @@ Then drag the extracted folder into the Terminal window and press **Enter**.
 
 ## 3. Install Dependencies
 
-Inside the project folder, run:
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-If you don't have a `requirements.txt`, install everything manually:
-
 ```bash
 python3 -m pip install pyautogui pynput pyobjc
 ```
@@ -148,27 +140,3 @@ HOLD_MIN     = 0.03               # Minimum key hold duration
 HOLD_MAX     = 0.04               # Maximum key hold duration
 
 # ──────────────────────────────────────────────────────────────────────────
-```
-
-Increasing the interval values lowers CPS but makes input appear more human-like.
-
----
-
-# 📦 Project Structure
-
-```
-BongoCatClicker/
-│
-├── main.py
-├── requirements.txt
-├── LICENSE
-└── README.md
-```
-
----
-
-# 📝 License
-
-This project is distributed under the **MIT License**.
-
-See the **LICENSE** file for more information.
